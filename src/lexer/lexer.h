@@ -29,7 +29,7 @@ enum struct ETokenKind {
 // description of every token
 struct TToken {
     ETokenKind Kind;
-    TSourceLocation SourceLocation;
+    TSourceRange SourceRange;
 };
 
 struct ITokenVisitor {

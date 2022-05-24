@@ -33,7 +33,7 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
     if (offset >= buffer.length()) {
         return TToken{
             .Kind = ETokenKind::Eof,
-            .SourceLocation = TSourceLocation{.Source = &source, .Offset = buffer.length(), .Length = 0},
+            .SourceRange = TSourceRange{.Source = &source, .Offset = buffer.length(), .Length = 0},
         };
     }
 
@@ -58,7 +58,7 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
         // return token
         return TToken{
             .Kind = kind,
-            .SourceLocation = TSourceLocation{.Source = &source, .Offset = beginOffset, .Length = tokenLength},
+            .SourceRange = TSourceRange{.Source = &source, .Offset = beginOffset, .Length = tokenLength},
         };
     }
 
@@ -72,7 +72,7 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
         // return token
         return TToken{
             .Kind = ETokenKind::Number,
-            .SourceLocation = TSourceLocation{.Source = &source, .Offset = beginOffset, .Length = tokenLength},
+            .SourceRange = TSourceRange{.Source = &source, .Offset = beginOffset, .Length = tokenLength},
         };
     }
 
@@ -89,7 +89,7 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
     char ch = buffer[offset++];
     return TToken{
         .Kind = CharToToken(ch),
-        .SourceLocation = TSourceLocation{.Source = &source, .Offset = beginOffset, .Length = 1},
+        .SourceRange = TSourceRange{.Source = &source, .Offset = beginOffset, .Length = 1},
     };
 }
 
