@@ -1,4 +1,4 @@
-add_library(ast ast.cc)
+add_library(ast ast.cc ast_dump.cc)
 
 target_include_directories(ast INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
