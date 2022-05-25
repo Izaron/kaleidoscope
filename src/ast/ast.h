@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include "source.h"
@@ -11,28 +12,31 @@ namespace NKaleidoscope::NAst {
 class TExpr {
 public:
     virtual ~TExpr() = default;
+    virtual void Dump(std::stringstream&) = 0;
 };
 
 // numeric literals like "1.0"
 class TNumberExpr : public TExpr {
 public:
     TNumberExpr(double value);
+    void Dump(std::stringstream&) override;
 
 private:
     double Value_;
 };
 
 // referencing a variable like "a"
-class TVariableExpr : TExpr {
+class TVariableExpr : public TExpr {
 public:
     TVariableExpr(TSourceRange name);
+    void Dump(std::stringstream&) override;
 
 private:
     TSourceRange Name_;
 };
 
 // a binary operator
-class TBinaryExpr : TExpr {
+class TBinaryExpr : public TExpr {
 public:
     enum struct EOp {
         Plus,
@@ -41,6 +45,7 @@ public:
 
 public:
     TBinaryExpr(EOp op, std::unique_ptr<TExpr> lhs, std::unique_ptr<TExpr> rhs);
+    void Dump(std::stringstream&) override;
 
 private:
     EOp Op_;
@@ -49,7 +54,7 @@ private:
 };
 
 // function call
-class TCallExpr : TExpr {
+class TCallExpr : public TExpr {
 public:
     TCallExpr(TSourceRange callee, std::vector<std::unique_ptr<TExpr>> args);
 

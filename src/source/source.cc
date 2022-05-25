@@ -2,6 +2,7 @@
 
 namespace NKaleidoscope {
 
+// TSource
 std::string_view TSource::GetBuffer() const {
     return Buffer_;
 }
@@ -17,6 +18,12 @@ TSource::TSource(std::optional<std::string> fileName, std::string buffer)
 
 TSource TSource::FromString(std::string buffer) {
     return TSource{/* fileName = */ std::nullopt, std::move(buffer)};
+}
+
+// TSourceLocation
+std::string_view TSourceRange::AsStringView() const {
+    const auto* data = Source->GetBuffer().data();
+    return {data + Offset, Length};
 }
 
 } // namespace NKaleidoscope

@@ -28,6 +28,8 @@ struct TSourceRange {
     const TSource* Source;
     std::size_t Offset;
     std::size_t Length;
+
+    std::string_view AsStringView() const;
 };
 
 } // namespace NKaleidoscope
