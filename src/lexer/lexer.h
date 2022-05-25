@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "source.h"
 
 namespace NKaleidoscope {
@@ -34,10 +36,23 @@ struct TToken {
     TSourceRange SourceRange;
 };
 
+// token parsers
+class TTokenList {
+public:
+    void AddToken(TToken token);
+    const TToken& Current() const;
+    bool Eat();
+
+private:
+    std::vector<TToken> Tokens_;
+    std::size_t Index_;
+};
+
 struct ITokenVisitor {
     virtual void Visit(TToken token) = 0;
 };
 
 void ParseTokens(const TSource& source, ITokenVisitor& visitor);
+TTokenList ParseTokens(const TSource& source);
 
 } // namespace NKaleidoscope

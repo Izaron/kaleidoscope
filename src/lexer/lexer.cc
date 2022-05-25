@@ -111,4 +111,36 @@ void ParseTokens(const TSource& source, ITokenVisitor& visitor) {
     }
 }
 
+// token parsers
+void TTokenList::AddToken(TToken token) {
+    Tokens_.emplace_back(std::move(token));
+}
+
+const TToken& TTokenList::Current() const {
+    return Tokens_[Index_];
+}
+
+bool TTokenList::Eat() {
+    if (Index_ + 1 < Tokens_.size()) {
+        ++Index_;
+        return true;
+    }
+    return false;
+}
+
+TTokenList ParseTokens(const TSource& source) {
+    TTokenList tokenList;
+
+    struct TTokenVisitor final : ITokenVisitor {
+        TTokenList& TokenList;
+        TTokenVisitor(TTokenList tokenList) : TokenList{tokenList} {}
+
+        void Visit(TToken token) override {
+            TokenList.AddToken(std::move(token));
+        }
+    } visitor{tokenList};
+
+    return tokenList;
+}
+
 } // namespace NKaleidoscope
