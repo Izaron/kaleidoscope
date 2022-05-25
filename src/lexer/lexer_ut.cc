@@ -39,7 +39,7 @@ TEST(LexerTest, Smoke) {
 
     std::vector<ETokenKind> tokenKinds = {
         // def fib(x)
-        Def, Identifier, Invalid, Identifier, Invalid,
+        Def, Identifier, LBracket, Identifier, RBracket,
         // if x < 3 then
         Identifier, Identifier, Less, Number, Identifier,
         // 1
@@ -47,10 +47,10 @@ TEST(LexerTest, Smoke) {
         // else
         Identifier,
         // fib(x-1)+fib(x-2)
-        Identifier, Invalid, Identifier, Minus, Number, Invalid, Plus,
-        Identifier, Invalid, Identifier, Minus, Number, Invalid,
+        Identifier, LBracket, Identifier, Minus, Number, RBracket, Plus,
+        Identifier, LBracket, Identifier, Minus, Number, RBracket,
         // fib(40)
-        Identifier, Invalid, Number, Invalid,
+        Identifier, LBracket, Number, RBracket,
     };
 
     for (std::size_t i = 0; i < tokenKinds.size(); ++i) {

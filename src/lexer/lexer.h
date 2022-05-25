@@ -20,6 +20,8 @@ enum struct ETokenKind {
     Number,
 
     // one-symbol tokens
+    LBracket,   // (
+    RBracket,   // )
     Plus,       // +
     Minus,      // -
     Less,       // <

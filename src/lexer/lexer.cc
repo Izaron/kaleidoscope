@@ -10,6 +10,10 @@ bool IsDigitDot(auto c) {
 
 ETokenKind CharToToken(char c) {
     switch (c) {
+    case '(':
+        return ETokenKind::LBracket;
+    case ')':
+        return ETokenKind::RBracket;
     case '+':
         return ETokenKind::Plus;
     case '-':
