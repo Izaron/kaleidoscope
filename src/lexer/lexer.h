@@ -39,9 +39,11 @@ struct TToken {
 // token parsers
 class TTokenList {
 public:
+    TTokenList();
+
     void AddToken(TToken token);
     const TToken& Current() const;
-    bool Eat();
+    bool SkipToken();
 
 private:
     std::vector<TToken> Tokens_;

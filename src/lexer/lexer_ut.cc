@@ -2,6 +2,7 @@
 #include "lexer.h"
 
 using namespace NKaleidoscope;
+using enum ETokenKind;
 
 namespace {
 
@@ -25,11 +26,27 @@ def fib(x)
 fib(40)
 )";
 
+const std::vector<ETokenKind> TOKEN_KINDS = {
+    // def fib(x)
+    Def, Identifier, LBracket, Identifier, RBracket,
+    // if x < 3 then
+    Identifier, Identifier, Less, Number, Identifier,
+    // 1
+    Number,
+    // else
+    Identifier,
+    // fib(x-1)+fib(x-2)
+    Identifier, LBracket, Identifier, Minus, Number, RBracket, Plus,
+    Identifier, LBracket, Identifier, Minus, Number, RBracket,
+    // fib(40)
+    Identifier, LBracket, Number, RBracket,
+    // <eof>
+    Eof,
+};
+
 } // namespace
 
 TEST(LexerTest, Smoke) {
-    using enum ETokenKind;
-
     const TSource source = TSource::FromString(SMOKE_PROGRAM);
     TMockTokenVisitor tokenVisitor;
     ParseTokens(source, tokenVisitor);
@@ -37,23 +54,21 @@ TEST(LexerTest, Smoke) {
     const auto& tokens = tokenVisitor.Tokens;
     EXPECT_EQ(tokens.size(), 30);
 
-    std::vector<ETokenKind> tokenKinds = {
-        // def fib(x)
-        Def, Identifier, LBracket, Identifier, RBracket,
-        // if x < 3 then
-        Identifier, Identifier, Less, Number, Identifier,
-        // 1
-        Number,
-        // else
-        Identifier,
-        // fib(x-1)+fib(x-2)
-        Identifier, LBracket, Identifier, Minus, Number, RBracket, Plus,
-        Identifier, LBracket, Identifier, Minus, Number, RBracket,
-        // fib(40)
-        Identifier, LBracket, Number, RBracket,
-    };
+    for (std::size_t i = 0; i < TOKEN_KINDS.size(); ++i) {
+        EXPECT_EQ(tokens[i].Kind, TOKEN_KINDS[i]);
+    }
+}
 
-    for (std::size_t i = 0; i < tokenKinds.size(); ++i) {
-        EXPECT_EQ(tokens[i].Kind, tokenKinds[i]);
+TEST(LexerTest, TokenListSmoke) {
+    const TSource source = TSource::FromString(SMOKE_PROGRAM);
+    TTokenList tokenList = ParseTokens(source);
+
+    for (std::size_t i = 0; i < TOKEN_KINDS.size(); ++i) {
+        EXPECT_EQ(tokenList.Current().Kind, TOKEN_KINDS[i]);
+        if (i + 1 < TOKEN_KINDS.size()) {
+            EXPECT_TRUE(tokenList.SkipToken());
+        } else {
+            EXPECT_FALSE(tokenList.SkipToken());
+        }
     }
 }

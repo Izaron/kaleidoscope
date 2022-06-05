@@ -112,6 +112,11 @@ void ParseTokens(const TSource& source, ITokenVisitor& visitor) {
 }
 
 // token parsers
+TTokenList::TTokenList()
+    : Index_{0}
+{
+}
+
 void TTokenList::AddToken(TToken token) {
     Tokens_.emplace_back(std::move(token));
 }
@@ -120,7 +125,7 @@ const TToken& TTokenList::Current() const {
     return Tokens_[Index_];
 }
 
-bool TTokenList::Eat() {
+bool TTokenList::SkipToken() {
     if (Index_ + 1 < Tokens_.size()) {
         ++Index_;
         return true;
@@ -132,13 +137,14 @@ TTokenList ParseTokens(const TSource& source) {
     TTokenList tokenList;
 
     struct TTokenVisitor final : ITokenVisitor {
-        TTokenList& TokenList;
-        TTokenVisitor(TTokenList tokenList) : TokenList{tokenList} {}
+        TTokenList* TokenList;
+        TTokenVisitor(TTokenList* tokenList) : TokenList{tokenList} {}
 
         void Visit(TToken token) override {
-            TokenList.AddToken(std::move(token));
+            TokenList->AddToken(std::move(token));
         }
-    } visitor{tokenList};
+    } visitor{&tokenList};
+    ParseTokens(source, visitor);
 
     return tokenList;
 }

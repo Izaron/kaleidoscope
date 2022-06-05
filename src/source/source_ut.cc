@@ -8,3 +8,9 @@ TEST(SourceTest, FromString) {
     EXPECT_TRUE(s.GetBuffer() == "def sample");
     EXPECT_TRUE(s.GetFileName() == nullptr);
 }
+
+TEST(SourceTest, SourceRange) {
+    auto s = TSource::FromString("def sample");
+    TSourceRange sr{.Source = &s, .Offset = 2, .Length = 4};
+    EXPECT_TRUE(sr.AsStringView() == "f sa");
+}
