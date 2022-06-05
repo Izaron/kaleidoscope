@@ -16,6 +16,7 @@ target_link_libraries(
     parser_test
     gtest_main
     parser
+    dump
 )
 
 include(GoogleTest)

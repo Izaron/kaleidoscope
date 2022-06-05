@@ -1,25 +1,25 @@
 #include <gtest/gtest.h>
 #include <list>
-#include "ast.h"
+#include "dump.h"
 
 using namespace NKaleidoscope;
 using namespace NKaleidoscope::NAst;
 
-TEST(AstTest, DumpNumberExpr) {
-    EXPECT_EQ(TNumberExpr{/* value = */ 1.2}.Dump(), "NumberExpr: 1.2\n");
+TEST(DumpTest, DumpNumberExpr) {
+    EXPECT_EQ(Dump(TNumberExpr{/* value = */ 1.2}), "NumberExpr: 1.2\n");
 }
 
-TEST(AstTest, DumpVariableExpr) {
+TEST(DumpTest, DumpVariableExpr) {
     auto source = TSource::FromString("foo");
     auto sourceRange = TSourceRange{&source, 0, 3};
 
-    constexpr std::string_view expectedDump =
-R"(VariableExpr: "foo"
+    constexpr std::string_view expectedDump =R"(
+VariableExpr: "foo"
 )";
-    EXPECT_EQ(TVariableExpr{/* name = */ sourceRange}.Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(TVariableExpr{/* name = */ sourceRange}), expectedDump);
 }
 
-TEST(AstTest, DumpBinaryExpr) {
+TEST(DumpTest, DumpBinaryExpr) {
     auto source = TSource::FromString("foo");
     auto sourceRange = TSourceRange{&source, 0, 3};
 
@@ -31,15 +31,15 @@ TEST(AstTest, DumpBinaryExpr) {
         std::move(rhsExpr)
     };
 
-    constexpr std::string_view expectedDump =
-R"(BinaryExpr: "+"
+    constexpr std::string_view expectedDump =R"(
+BinaryExpr: "+"
   VariableExpr: "foo"
   NumberExpr: 1.2
 )";
-    EXPECT_EQ(binaryExpr.Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(binaryExpr), expectedDump);
 }
 
-TEST(AstTest, DumpCallExpr) {
+TEST(DumpTest, DumpCallExpr) {
     auto firstArgSource = TSource::FromString("foo");
     auto firstArgSourceRange = TSourceRange{&firstArgSource, 0, 3};
     auto firstArg = std::make_unique<TVariableExpr>(firstArgSourceRange);
@@ -56,16 +56,16 @@ TEST(AstTest, DumpCallExpr) {
     args.emplace_back(std::move(thirdArg));
 
     TCallExpr callExpr{calleeSourceRange, std::move(args)};
-    constexpr std::string_view expectedDump =
-R"(CallExpr: "func"
+    constexpr std::string_view expectedDump =R"(
+CallExpr: "func"
   VariableExpr: "foo"
   NumberExpr: 1.2
   NumberExpr: 3.4
 )";
-    EXPECT_EQ(callExpr.Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(callExpr), expectedDump);
 }
 
-TEST(AstTest, DumpPrototype) {
+TEST(DumpTest, DumpPrototype) {
     auto nameSource = TSource::FromString("func");
     auto nameSourceRange = TSourceRange{&nameSource, 0, 4};
 
@@ -76,8 +76,8 @@ TEST(AstTest, DumpPrototype) {
     auto arg1SourceRange = TSourceRange{&arg1Source, 0, 4};
 
     TPrototype prototype{nameSourceRange, std::vector<TSourceRange>{arg0SourceRange, arg1SourceRange}};
-    constexpr std::string_view expectedDump =
-R"(Prototype: "func", args: "arg0", "arg1"
+    constexpr std::string_view expectedDump = R"(
+Prototype: "func", args: "arg0", "arg1"
 )";
-    EXPECT_EQ(prototype.Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(prototype), expectedDump);
 }

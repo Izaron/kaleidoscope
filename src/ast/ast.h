@@ -1,25 +1,48 @@
 #pragma once
 
 #include <memory>
-#include <sstream>
 #include <vector>
 
 #include "source.h"
 
 namespace NKaleidoscope::NAst {
 
-// base class for all expression nodes
-class TExpr {
+// forward declarations for visitor pattern
+class TNumberExpr;
+class TVariableExpr;
+class TBinaryExpr;
+class TCallExpr;
+class TPrototype;
+class TFunction;
+
+class IVisitor {
 public:
-    virtual ~TExpr() = default;
-    virtual std::string Dump() const = 0;
+    virtual ~IVisitor() = default;
+    virtual void Visit(const TNumberExpr&) = 0;
+    virtual void Visit(const TVariableExpr&) = 0;
+    virtual void Visit(const TBinaryExpr&) = 0;
+    virtual void Visit(const TCallExpr&) = 0;
+    virtual void Visit(const TPrototype&) = 0;
+    virtual void Visit(const TFunction&) = 0;
 };
+
+// base class for all nodes
+class TNode {
+public:
+    virtual ~TNode() = default;
+    virtual void Accept(IVisitor& v) const = 0;
+};
+
+// base class for all expression nodes
+class TExpr : public TNode {};
 
 // numeric literals like "1.0"
 class TNumberExpr : public TExpr {
 public:
     TNumberExpr(double value);
-    std::string Dump() const override;
+    double GetValue() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     double Value_;
@@ -29,7 +52,9 @@ private:
 class TVariableExpr : public TExpr {
 public:
     TVariableExpr(TSourceRange name);
-    std::string Dump() const override;
+    const TSourceRange& GetName() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     TSourceRange Name_;
@@ -47,7 +72,11 @@ public:
 
 public:
     TBinaryExpr(EOp op, std::unique_ptr<TExpr> lhs, std::unique_ptr<TExpr> rhs);
-    std::string Dump() const override;
+    EOp GetOp() const;
+    const TExpr& GetLhs() const;
+    const TExpr& GetRhs() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     EOp Op_;
@@ -59,7 +88,10 @@ private:
 class TCallExpr : public TExpr {
 public:
     TCallExpr(TSourceRange callee, std::vector<std::unique_ptr<TExpr>> args);
-    std::string Dump() const override;
+    const TSourceRange& GetCallee() const;
+    const std::vector<std::unique_ptr<TExpr>>& GetArgs() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     TSourceRange Callee_;
@@ -67,11 +99,13 @@ private:
 };
 
 // "prototype" of a function (declaration)
-class TPrototype {
+class TPrototype : public TNode {
 public:
     TPrototype(TSourceRange name, std::vector<TSourceRange> args);
-    std::string Dump() const;
     const TSourceRange& GetName() const;
+    const std::vector<TSourceRange>& GetArgs() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     TSourceRange Name_;
@@ -79,10 +113,13 @@ private:
 };
 
 // a function definition (at the same time it is a prototype)
-class TFunction {
+class TFunction : public TNode {
 public:
     TFunction(std::unique_ptr<TPrototype> prototype, std::unique_ptr<TExpr> body);
-    std::string Dump() const;
+    const TPrototype& GetPrototype() const;
+    const TExpr& GetBody() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
 
 private:
     std::unique_ptr<TPrototype> Prototype_;

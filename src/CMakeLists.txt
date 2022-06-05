@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 
 # list subdirectories
 add_subdirectory(ast)
+add_subdirectory(dump)
 add_subdirectory(lexer)
 add_subdirectory(noncopyable)
 add_subdirectory(parser)

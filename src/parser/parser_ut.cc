@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "parser.h"
+#include "dump.h"
 
 using namespace NKaleidoscope;
 
@@ -18,7 +19,7 @@ Function definition:
       VariableExpr: "y"
       NumberExpr: 4
 )";
-    EXPECT_EQ("\n" + definition->Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(*definition), expectedDump);
 }
 
 TEST(ParserTest, Def2) {
@@ -34,7 +35,7 @@ Function definition:
     VariableExpr: "x"
     VariableExpr: "y"
 )";
-    EXPECT_EQ("\n" + definition->Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(*definition), expectedDump);
 }
 
 TEST(ParserTest, Extern1) {
@@ -46,5 +47,5 @@ TEST(ParserTest, Extern1) {
     constexpr std::string_view expectedDump = R"(
 Prototype: "sin", args: "a"
 )";
-    EXPECT_EQ("\n" + definition->Dump(), expectedDump);
+    EXPECT_EQ("\n" + Dump(*definition), expectedDump);
 }
