@@ -26,4 +26,10 @@ std::string_view TSourceRange::AsStringView() const {
     return {data + Offset, Length};
 }
 
+double TSourceRange::AsDouble() const {
+    const std::string_view sv = AsStringView();
+    char* strEnd = const_cast<char*>(sv.data()) + Length;
+    return std::strtod(sv.data(), &strEnd);
+}
+
 } // namespace NKaleidoscope

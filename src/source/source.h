@@ -30,6 +30,7 @@ struct TSourceRange {
     std::size_t Length;
 
     std::string_view AsStringView() const;
+    double AsDouble() const;
 };
 
 } // namespace NKaleidoscope

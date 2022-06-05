@@ -44,6 +44,17 @@ const std::vector<ETokenKind> TOKEN_KINDS = {
     Eof,
 };
 
+const std::vector<double> TOKEN_NUMBERS = {
+    // x < 3
+    3,
+    // 1
+    1,
+    // fib(x-1)+fib(x-2)
+    1, 2,
+    // fib(40)
+    40,
+};
+
 } // namespace
 
 TEST(LexerTest, Smoke) {
@@ -54,8 +65,14 @@ TEST(LexerTest, Smoke) {
     const auto& tokens = tokenVisitor.Tokens;
     EXPECT_EQ(tokens.size(), 30);
 
+    std::size_t numbersIndex = 0;
     for (std::size_t i = 0; i < TOKEN_KINDS.size(); ++i) {
-        EXPECT_EQ(tokens[i].Kind, TOKEN_KINDS[i]);
+        const auto kind = tokens[i].Kind;
+        EXPECT_EQ(kind, TOKEN_KINDS[i]);
+        if (kind == Number) {
+            EXPECT_EQ(tokens[i].SourceRange.AsDouble(), TOKEN_NUMBERS[numbersIndex]);
+            ++numbersIndex;
+        }
     }
 }
 
