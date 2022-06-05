@@ -60,7 +60,7 @@ const std::vector<double> TOKEN_NUMBERS = {
 TEST(LexerTest, Smoke) {
     const TSource source = TSource::FromString(SMOKE_PROGRAM);
     TMockTokenVisitor tokenVisitor;
-    ParseTokens(source, tokenVisitor);
+    LexTokens(source, tokenVisitor);
 
     const auto& tokens = tokenVisitor.Tokens;
     EXPECT_EQ(tokens.size(), 30);
@@ -78,7 +78,7 @@ TEST(LexerTest, Smoke) {
 
 TEST(LexerTest, TokenListSmoke) {
     const TSource source = TSource::FromString(SMOKE_PROGRAM);
-    TTokenList tokenList = ParseTokens(source);
+    TTokenList tokenList = LexTokens(source);
 
     for (std::size_t i = 0; i < TOKEN_KINDS.size(); ++i) {
         EXPECT_EQ(tokenList.Current().Kind, TOKEN_KINDS[i]);

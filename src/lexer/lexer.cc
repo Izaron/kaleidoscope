@@ -14,10 +14,14 @@ ETokenKind CharToToken(char c) {
         return ETokenKind::LBracket;
     case ')':
         return ETokenKind::RBracket;
+    case ',':
+        return ETokenKind::Comma;
     case '+':
         return ETokenKind::Plus;
     case '-':
         return ETokenKind::Minus;
+    case '*':
+        return ETokenKind::Multiply;
     case '<':
         return ETokenKind::Less;
     case '>':
@@ -27,7 +31,7 @@ ETokenKind CharToToken(char c) {
     }
 }
 
-TToken ParseToken(const TSource& source, std::size_t& offset) {
+TToken LexToken(const TSource& source, std::size_t& offset) {
     std::string_view buffer = source.GetBuffer();
     while (offset < buffer.length() && std::isspace(buffer[offset])) {
         ++offset;
@@ -86,7 +90,7 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
             ++offset;
         } while (offset < buffer.length() && buffer[offset] != '\n' && buffer[offset] != '\n');
 
-        return ParseToken(source, offset);
+        return LexToken(source, offset);
     }
 
     // map the current character to the token
@@ -99,10 +103,10 @@ TToken ParseToken(const TSource& source, std::size_t& offset) {
 
 } // namespace
 
-void ParseTokens(const TSource& source, ITokenVisitor& visitor) {
+void LexTokens(const TSource& source, ITokenVisitor& visitor) {
     std::size_t offset = 0;
     while (true) {
-        TToken token = ParseToken(source, offset);
+        TToken token = LexToken(source, offset);
         bool isEof = token.Kind == ETokenKind::Eof;
         visitor.Visit(std::move(token));
         if (isEof) {
@@ -133,7 +137,7 @@ bool TTokenList::SkipToken() {
     return false;
 }
 
-TTokenList ParseTokens(const TSource& source) {
+TTokenList LexTokens(const TSource& source) {
     TTokenList tokenList;
 
     struct TTokenVisitor final : ITokenVisitor {
@@ -144,7 +148,7 @@ TTokenList ParseTokens(const TSource& source) {
             TokenList->AddToken(std::move(token));
         }
     } visitor{&tokenList};
-    ParseTokens(source, visitor);
+    LexTokens(source, visitor);
 
     return tokenList;
 }

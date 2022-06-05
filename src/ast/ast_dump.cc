@@ -9,10 +9,24 @@ constexpr std::string_view DUMP_CHILD_INDENT = "  ";
 char BinaryExprOpToChar(TBinaryExpr::EOp op) {
     using enum TBinaryExpr::EOp;
     switch (op) {
+        case Less: return '<';
         case Plus: return '+';
         case Minus: return '-';
+        case Multiply: return '*';
         default: __builtin_unreachable();
     }
+}
+
+std::string Indent(std::string s) {
+    std::stringstream result;
+    result << DUMP_CHILD_INDENT;
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        result << s[i];
+        if (s[i] == '\n' && i != s.size() - 1) {
+            result << DUMP_CHILD_INDENT;
+        }
+    }
+    return result.str();
 }
 
 } // namespace
@@ -35,8 +49,8 @@ std::string TVariableExpr::Dump() const {
 std::string TBinaryExpr::Dump() const {
     std::stringstream ss;
     ss << "BinaryExpr: \"" << BinaryExprOpToChar(Op_) << "\"\n";
-    ss << DUMP_CHILD_INDENT << Lhs_->Dump();
-    ss << DUMP_CHILD_INDENT << Rhs_->Dump();
+    ss << Indent(Lhs_->Dump());
+    ss << Indent(Rhs_->Dump());
     return ss.str();
 }
 
@@ -45,7 +59,7 @@ std::string TCallExpr::Dump() const {
     std::stringstream ss;
     ss << "CallExpr: \"" << Callee_.AsStringView() << "\"\n";
     for (const auto& arg : Args_) {
-        ss << DUMP_CHILD_INDENT << arg->Dump();
+        ss << Indent(arg->Dump());
     }
     return ss.str();
 }
@@ -69,8 +83,8 @@ std::string TPrototype::Dump() const {
 std::string TFunction::Dump() const {
     std::stringstream ss;
     ss << "Function definition: \n";
-    ss << DUMP_CHILD_INDENT << Prototype_->Dump();
-    ss << DUMP_CHILD_INDENT << Body_->Dump();
+    ss << Indent(Prototype_->Dump());
+    ss << Indent(Body_->Dump());
     return ss.str();
 }
 

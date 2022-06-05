@@ -24,8 +24,10 @@ enum struct ETokenKind {
     // one-symbol tokens
     LBracket,   // (
     RBracket,   // )
+    Comma,      // ,
     Plus,       // +
     Minus,      // -
+    Multiply,   // *
     Less,       // <
     Greater,    // >
 };
@@ -54,7 +56,7 @@ struct ITokenVisitor {
     virtual void Visit(TToken token) = 0;
 };
 
-void ParseTokens(const TSource& source, ITokenVisitor& visitor);
-TTokenList ParseTokens(const TSource& source);
+void LexTokens(const TSource& source, ITokenVisitor& visitor);
+TTokenList LexTokens(const TSource& source);
 
 } // namespace NKaleidoscope

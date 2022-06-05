@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 add_subdirectory(ast)
 add_subdirectory(lexer)
 add_subdirectory(noncopyable)
+add_subdirectory(parser)
 add_subdirectory(source)
 
 # enable gtest (for testing)

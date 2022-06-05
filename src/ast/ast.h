@@ -39,8 +39,10 @@ private:
 class TBinaryExpr : public TExpr {
 public:
     enum struct EOp {
+        Less,
         Plus,
         Minus,
+        Multiply,
     };
 
 public:
