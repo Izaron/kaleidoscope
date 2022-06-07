@@ -6,8 +6,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 
+# add LLVM library
+find_package(LLVM)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
 # list subdirectories
 add_subdirectory(ast)
+add_subdirectory(codegen)
 add_subdirectory(dump)
 add_subdirectory(lexer)
 add_subdirectory(noncopyable)

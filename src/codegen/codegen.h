@@ -4,8 +4,10 @@
 
 namespace NKaleidoscope {
 
-class TDumpVisitor : public NAst::IVisitor {
+class TCodegenVisitor : public NAst::IVisitor {
 public:
+    TCodegenVisitor();
+
     void Visit(const NAst::TNumberExpr&) override;
     void Visit(const NAst::TVariableExpr&) override;
     void Visit(const NAst::TBinaryExpr&) override;
@@ -13,12 +15,9 @@ public:
     void Visit(const NAst::TPrototype&) override;
     void Visit(const NAst::TFunction&) override;
 
-    const std::string& GetDump() const;
-
 private:
-    std::string Dump_;
+    class TImpl;
+    std::unique_ptr<TImpl> Impl_;
 };
-
-std::string Dump(const NAst::TNode& node);
 
 } // namespace NKaleidoscope
