@@ -15,6 +15,7 @@ public:
     TImpl(TCodegenVisitor& visitor)
         : Visitor_{visitor}
         , Builder_{Context_}
+        , Module_{std::make_unique<llvm::Module>("cool_module", Context_)}
     {
     }
 
@@ -124,6 +125,9 @@ public:
         llvm::verifyFunction(*func);
     }
 
+    const llvm::Value* GetValue() const { return Value_; }
+    const llvm::Function* GetFunction() const { return Function_; }
+
 private:
     // base visitor
     TCodegenVisitor& Visitor_;
@@ -145,11 +149,18 @@ TCodegenVisitor::TCodegenVisitor()
 {
 }
 
+TCodegenVisitor::~TCodegenVisitor()
+{
+}
+
 void TCodegenVisitor::Visit(const NAst::TNumberExpr& numberExpr) { Impl_->Visit(numberExpr); }
 void TCodegenVisitor::Visit(const NAst::TVariableExpr& variableExpr) { Impl_->Visit(variableExpr); }
 void TCodegenVisitor::Visit(const NAst::TBinaryExpr& binaryExpr) { Impl_->Visit(binaryExpr); }
 void TCodegenVisitor::Visit(const NAst::TCallExpr& callExpr) { Impl_->Visit(callExpr); }
 void TCodegenVisitor::Visit(const NAst::TPrototype& prototype) { Impl_->Visit(prototype); }
 void TCodegenVisitor::Visit(const NAst::TFunction& function) { Impl_->Visit(function); }
+
+const llvm::Value* TCodegenVisitor::GetValue() const { return Impl_->GetValue(); }
+const llvm::Function* TCodegenVisitor::GetFunction() const { return Impl_->GetFunction(); }
 
 } // namespace NKaleidoscope

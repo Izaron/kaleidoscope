@@ -170,6 +170,35 @@ std::unique_ptr<NAst::TPrototype> TParser::ParseExtern() {
     return ParsePrototype();
 }
 
+std::unique_ptr<NAst::TNode> TParser::ParseTop() {
+    while (Tokens_.Current().Kind == ETokenKind::Semicolon) {
+        Tokens_.SkipToken(); // eat ';'
+    }
+
+    switch (Tokens_.Current().Kind) {
+    case ETokenKind::Eof:
+        return nullptr;
+    case ETokenKind::Def:
+        return ParseDefinition();
+    case ETokenKind::Extern:
+        return ParseExtern();
+    default:
+        return ParseExpr();
+    }
+}
+
+std::vector<std::unique_ptr<NAst::TNode>> TParser::ParseChunk() {
+    std::vector<std::unique_ptr<NAst::TNode>> nodes;
+    while (true) {
+        auto top = ParseTop();
+        if (!top) {
+            break;
+        }
+        nodes.push_back(std::move(top));
+    }
+    return nodes;
+}
+
 int TParser::GetTokenPrecedence() const {
     const auto kind = Tokens_.Current().Kind;
     if (auto iter = BINOP_PRECEDENCE.find(kind); iter != BINOP_PRECEDENCE.end()) {

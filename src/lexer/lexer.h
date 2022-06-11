@@ -30,6 +30,7 @@ enum struct ETokenKind {
     Multiply,   // *
     Less,       // <
     Greater,    // >
+    Semicolon,  // ;
 };
 
 // description of every token

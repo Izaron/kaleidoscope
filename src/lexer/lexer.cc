@@ -26,6 +26,8 @@ ETokenKind CharToToken(char c) {
         return ETokenKind::Less;
     case '>':
         return ETokenKind::Greater;
+    case ';':
+        return ETokenKind::Semicolon;
     default:
         return ETokenKind::Invalid;
     }

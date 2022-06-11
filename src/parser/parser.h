@@ -44,6 +44,12 @@ public:
     // external ::= 'extern' prototype
     std::unique_ptr<NAst::TPrototype> ParseExtern();
 
+    // top ::= definition | external | expression | ';'
+    std::unique_ptr<NAst::TNode> ParseTop();
+
+    // chunk ::= top*
+    std::vector<std::unique_ptr<NAst::TNode>> ParseChunk();
+
 private:
     // helper methods
     int GetTokenPrecedence() const;
