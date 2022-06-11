@@ -5,9 +5,35 @@
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar.h>
 
 namespace NKaleidoscope {
+
+namespace {
+
+llvm::legacy::FunctionPassManager ConstructFunctionPassManager(llvm::Module& module) {
+    llvm::legacy::FunctionPassManager manager{&module};
+
+    // simple optimizations
+    manager.add(llvm::createInstructionCombiningPass());
+
+    // reassociate expressions
+    manager.add(llvm::createReassociatePass());
+
+    // eliminate common subexpressions
+    manager.add(llvm::createNewGVNPass());
+
+    // simplify the control flow graph
+    manager.add(llvm::createCFGSimplificationPass());
+
+    manager.doInitialization();
+    return manager;
+}
+
+} // namespace
 
 // TCodegenVisitor::TImpl
 class TCodegenVisitor::TImpl {
@@ -15,7 +41,8 @@ public:
     TImpl(TCodegenVisitor& visitor)
         : Visitor_{visitor}
         , Builder_{Context_}
-        , Module_{std::make_unique<llvm::Module>("cool_module", Context_)}
+        , Module_{"cool_module", Context_}
+        , FunctionPassManager_{ConstructFunctionPassManager(Module_)}
     {
     }
 
@@ -61,7 +88,7 @@ public:
     void Visit(const NAst::TCallExpr& callExpr) {
         // lookup callee function in the module
         const std::string_view calleeName = callExpr.GetCallee().AsStringView();
-        llvm::Function* calleeFunction = Module_->getFunction(calleeName);
+        llvm::Function* calleeFunction = Module_.getFunction(calleeName);
         if (!calleeFunction) {
             throw std::runtime_error("Unknown function \"" + std::string{calleeName} + "\"");
         }
@@ -89,7 +116,7 @@ public:
         llvm::FunctionType* functionType = llvm::FunctionType::get(
             llvm::Type::getDoubleTy(Context_), doubles, /* isVarArg = */ false);
 
-        Function_ = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, *Module_);
+        Function_ = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, Module_);
 
         // set names for all arguments
         std::size_t idx = 0;
@@ -100,7 +127,7 @@ public:
 
     void Visit(const NAst::TFunction& function) {
         const std::string_view funcName = function.GetPrototype().GetName().AsStringView();
-        llvm::Function* func = Module_->getFunction(funcName);
+        llvm::Function* func = Module_.getFunction(funcName);
         if (!func) {
             function.GetPrototype().Accept(Visitor_);
             func = Function_;
@@ -123,6 +150,7 @@ public:
         function.GetBody().Accept(Visitor_);
         Builder_.CreateRet(Value_);
         llvm::verifyFunction(*func);
+        FunctionPassManager_.run(*func);
     }
 
     const llvm::Value* GetValue() const { return Value_; }
@@ -135,7 +163,8 @@ private:
     // llvm classes
     llvm::LLVMContext Context_;
     llvm::IRBuilder<> Builder_;
-    std::unique_ptr<llvm::Module> Module_;
+    llvm::Module Module_;
+    llvm::legacy::FunctionPassManager FunctionPassManager_;
     std::map<std::string_view, llvm::Value*, std::less<>> NamedValues_;
 
     // visitor's values

@@ -52,11 +52,11 @@ TEST(CodegenTest, SimpleFunc) {
 define double @foo(double %a, double %b) {
 entry:
   %multmp = fmul double %a, %a
-  %multmp1 = fmul double 2.000000e+00, %a
+  %multmp1 = fmul double %a, 2.000000e+00
   %multmp2 = fmul double %multmp1, %b
   %addtmp = fadd double %multmp, %multmp2
   %multmp3 = fmul double %b, %b
-  %addtmp4 = fadd double %addtmp, %multmp3
+  %addtmp4 = fadd double %multmp3, %addtmp
   ret double %addtmp4
 }
 )");
@@ -100,5 +100,27 @@ extern cos(x);
 
     EXPECT_EQ("\n" + Print(codegen.GetFunction()), R"(
 declare double @cos(double)
+)");
+}
+
+TEST(CodegenTest, OptimizedFunc) {
+    TCodegenVisitor codegen;
+
+    auto source = TSource::FromString(R"(
+def test(x) (1+2+x)*(x+(1+2))
+)");
+    auto tokens = LexTokens(source);
+    auto parser = TParser{std::move(tokens)};
+    for (auto&& astNode : parser.ParseChunk()) {
+        astNode->Accept(codegen);
+    }
+
+    EXPECT_EQ("\n" + Print(codegen.GetFunction()), R"(
+define double @test(double %x) {
+entry:
+  %addtmp = fadd double %x, 3.000000e+00
+  %multmp = fmul double %addtmp, %addtmp
+  ret double %multmp
+}
 )");
 }

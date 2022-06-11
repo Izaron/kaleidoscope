@@ -12,7 +12,7 @@ add_executable(
     codegen_ut.cc
 )
 
-llvm_map_components_to_libnames(llvm_libs core)
+llvm_map_components_to_libnames(llvm_libs core ipo)
 
 target_link_libraries(
     codegen_test
