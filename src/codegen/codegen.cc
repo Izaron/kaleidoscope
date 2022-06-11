@@ -3,6 +3,8 @@
 #include <map>
 #include <stack>
 
+#include <llvm/Pass.h>
+
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/LegacyPassManager.h>
@@ -202,6 +204,8 @@ public:
     const llvm::Value* GetValue() const { return Value_; }
     const llvm::Function* GetFunction() const { return Function_; }
 
+    llvm::Module& GetModule() { return Module_; }
+
 private:
     // base visitor
     TCodegenVisitor& Visitor_;
@@ -238,5 +242,7 @@ void TCodegenVisitor::Visit(const NAst::TFunction& function) { Impl_->Visit(func
 
 const llvm::Value* TCodegenVisitor::GetValue() const { return Impl_->GetValue(); }
 const llvm::Function* TCodegenVisitor::GetFunction() const { return Impl_->GetFunction(); }
+
+llvm::Module& TCodegenVisitor::GetModule() { return Impl_->GetModule(); }
 
 } // namespace NKaleidoscope

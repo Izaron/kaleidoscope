@@ -27,6 +27,8 @@ public:
     const llvm::Value* GetValue() const;
     const llvm::Function* GetFunction() const;
 
+    llvm::Module& GetModule();
+
 private:
     class TImpl;
     std::unique_ptr<TImpl> Impl_;
