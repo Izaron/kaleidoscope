@@ -21,6 +21,7 @@ add_subdirectory(lexer)
 add_subdirectory(noncopyable)
 add_subdirectory(parser)
 add_subdirectory(source)
+add_subdirectory(tool)
 
 # enable gtest (for testing)
 include(FetchContent)
