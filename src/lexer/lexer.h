@@ -21,6 +21,11 @@ enum struct ETokenKind {
     Identifier,
     Number,
 
+    // control flow
+    If,
+    Then,
+    Else,
+
     // one-symbol tokens
     LBracket,   // (
     RBracket,   // )

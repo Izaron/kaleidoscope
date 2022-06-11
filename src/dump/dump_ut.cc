@@ -81,3 +81,21 @@ Prototype: "func", args: "arg0", "arg1"
 )";
     EXPECT_EQ("\n" + Dump(prototype), expectedDump);
 }
+
+TEST(DumpTest, DumpIfExpr) {
+    auto condExpr = std::make_unique<TNumberExpr>(1);
+    auto thenExpr = std::make_unique<TNumberExpr>(2);
+    auto elseExpr = std::make_unique<TNumberExpr>(3);
+    TIfExpr ifExpr{std::move(condExpr), std::move(thenExpr), std::move(elseExpr)};
+
+    constexpr std::string_view expectedDump =R"(
+IfExpr:
+Cond:
+  NumberExpr: 1
+Then:
+  NumberExpr: 2
+Else:
+  NumberExpr: 3
+)";
+    EXPECT_EQ("\n" + Dump(ifExpr), expectedDump);
+}

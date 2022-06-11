@@ -11,6 +11,7 @@ namespace NKaleidoscope::NAst {
 class TNumberExpr;
 class TVariableExpr;
 class TBinaryExpr;
+class TIfExpr;
 class TCallExpr;
 class TPrototype;
 class TFunction;
@@ -21,6 +22,7 @@ public:
     virtual void Visit(const TNumberExpr&) = 0;
     virtual void Visit(const TVariableExpr&) = 0;
     virtual void Visit(const TBinaryExpr&) = 0;
+    virtual void Visit(const TIfExpr&) = 0;
     virtual void Visit(const TCallExpr&) = 0;
     virtual void Visit(const TPrototype&) = 0;
     virtual void Visit(const TFunction&) = 0;
@@ -82,6 +84,24 @@ private:
     EOp Op_;
     std::unique_ptr<TExpr> Lhs_;
     std::unique_ptr<TExpr> Rhs_;
+};
+
+// if-then-else expression
+class TIfExpr : public TExpr {
+public:
+    TIfExpr(std::unique_ptr<TExpr> condExpr,
+            std::unique_ptr<TExpr> thenExpr,
+            std::unique_ptr<TExpr> elseExpr);
+    const TExpr& GetCond() const;
+    const TExpr& GetThen() const;
+    const TExpr& GetElse() const;
+
+    void Accept(IVisitor& v) const override { v.Visit(*this); }
+
+private:
+    std::unique_ptr<TExpr> Cond_;
+    std::unique_ptr<TExpr> Then_;
+    std::unique_ptr<TExpr> Else_;
 };
 
 // function call

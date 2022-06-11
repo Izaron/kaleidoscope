@@ -39,6 +39,27 @@ const TExpr& TBinaryExpr::GetRhs() const {
     return *Rhs_;
 }
 
+// TIfExpr
+TIfExpr::TIfExpr(std::unique_ptr<TExpr> condExpr,
+                 std::unique_ptr<TExpr> thenExpr,
+                 std::unique_ptr<TExpr> elseExpr)
+    : Cond_{std::move(condExpr)}
+    , Then_{std::move(thenExpr)}
+    , Else_{std::move(elseExpr)}
+{}
+
+const TExpr& TIfExpr::GetCond() const {
+    return *Cond_;
+}
+
+const TExpr& TIfExpr::GetThen() const {
+    return *Then_;
+}
+
+const TExpr& TIfExpr::GetElse() const {
+    return *Else_;
+}
+
 // TCallExpr
 TCallExpr::TCallExpr(TSourceRange callee, std::vector<std::unique_ptr<TExpr>> args)
     : Callee_{callee}

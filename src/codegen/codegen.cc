@@ -14,20 +14,24 @@ namespace NKaleidoscope {
 
 namespace {
 
-llvm::legacy::FunctionPassManager ConstructFunctionPassManager(llvm::Module& module) {
+llvm::legacy::FunctionPassManager ConstructFunctionPassManager(llvm::Module& module,
+                                                               EOptimizationLevel optimizationLevel)
+{
     llvm::legacy::FunctionPassManager manager{&module};
 
-    // simple optimizations
-    manager.add(llvm::createInstructionCombiningPass());
+    if (optimizationLevel == EOptimizationLevel::High) {
+        // simple optimizations
+        manager.add(llvm::createInstructionCombiningPass());
 
-    // reassociate expressions
-    manager.add(llvm::createReassociatePass());
+        // reassociate expressions
+        manager.add(llvm::createReassociatePass());
 
-    // eliminate common subexpressions
-    manager.add(llvm::createNewGVNPass());
+        // eliminate common subexpressions
+        manager.add(llvm::createNewGVNPass());
 
-    // simplify the control flow graph
-    manager.add(llvm::createCFGSimplificationPass());
+        // simplify the control flow graph
+        manager.add(llvm::createCFGSimplificationPass());
+    }
 
     manager.doInitialization();
     return manager;
@@ -38,11 +42,11 @@ llvm::legacy::FunctionPassManager ConstructFunctionPassManager(llvm::Module& mod
 // TCodegenVisitor::TImpl
 class TCodegenVisitor::TImpl {
 public:
-    TImpl(TCodegenVisitor& visitor)
+    TImpl(TCodegenVisitor& visitor, EOptimizationLevel optimizationLevel)
         : Visitor_{visitor}
         , Builder_{Context_}
         , Module_{"cool_module", Context_}
-        , FunctionPassManager_{ConstructFunctionPassManager(Module_)}
+        , FunctionPassManager_{ConstructFunctionPassManager(Module_, optimizationLevel)}
     {
     }
 
@@ -83,6 +87,48 @@ public:
                 Value_ = Builder_.CreateFMul(lhsValue, rhsValue, "multmp");
                 break;
         }
+    }
+
+    void Visit(const NAst::TIfExpr& ifExpr) {
+        ifExpr.GetCond().Accept(Visitor_);
+        llvm::Value* condValue = Value_;
+
+        // convert condition to a bool by comparing non-equal to 0.0
+        condValue = Builder_.CreateFCmpONE(condValue,
+                                           llvm::ConstantFP::get(Context_, llvm::APFloat{0.0}),
+                                           "ifcond");
+
+        // create blocks for then/else cases
+        llvm::Function* func = Builder_.GetInsertBlock()->getParent();
+        llvm::BasicBlock* thenBlock = llvm::BasicBlock::Create(Context_, "then", func);
+        llvm::BasicBlock* elseBlock = llvm::BasicBlock::Create(Context_, "else");
+        llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(Context_, "ifcont");
+
+        Builder_.CreateCondBr(condValue, thenBlock, elseBlock);
+
+        // emit 'then' block
+        Builder_.SetInsertPoint(thenBlock);
+        ifExpr.GetThen().Accept(Visitor_);
+        llvm::Value* thenValue = Value_;
+        Builder_.CreateBr(mergeBlock); // unconditional branch
+        thenBlock = Builder_.GetInsertBlock();
+
+        // emit 'else' block
+        func->getBasicBlockList().push_back(elseBlock);
+        Builder_.SetInsertPoint(elseBlock);
+        ifExpr.GetElse().Accept(Visitor_);
+        llvm::Value* elseValue = Value_;
+        Builder_.CreateBr(mergeBlock); // unconditional branch
+        elseBlock = Builder_.GetInsertBlock();
+
+        // emit merge block
+        func->getBasicBlockList().push_back(mergeBlock);
+        Builder_.SetInsertPoint(mergeBlock);
+        llvm::PHINode* phiNode = Builder_.CreatePHI(llvm::Type::getDoubleTy(Context_), 2, "iftmp");
+        phiNode->addIncoming(thenValue, thenBlock);
+        phiNode->addIncoming(elseValue, elseBlock);
+
+        Value_ = phiNode;
     }
 
     void Visit(const NAst::TCallExpr& callExpr) {
@@ -173,8 +219,8 @@ private:
 };
 
 // TCodegenVisitor
-TCodegenVisitor::TCodegenVisitor()
-    : Impl_{std::make_unique<TImpl>(*this)}
+TCodegenVisitor::TCodegenVisitor(EOptimizationLevel optimizationLevel)
+    : Impl_{std::make_unique<TImpl>(*this, optimizationLevel)}
 {
 }
 
@@ -185,6 +231,7 @@ TCodegenVisitor::~TCodegenVisitor()
 void TCodegenVisitor::Visit(const NAst::TNumberExpr& numberExpr) { Impl_->Visit(numberExpr); }
 void TCodegenVisitor::Visit(const NAst::TVariableExpr& variableExpr) { Impl_->Visit(variableExpr); }
 void TCodegenVisitor::Visit(const NAst::TBinaryExpr& binaryExpr) { Impl_->Visit(binaryExpr); }
+void TCodegenVisitor::Visit(const NAst::TIfExpr& ifExpr) { Impl_->Visit(ifExpr); }
 void TCodegenVisitor::Visit(const NAst::TCallExpr& callExpr) { Impl_->Visit(callExpr); }
 void TCodegenVisitor::Visit(const NAst::TPrototype& prototype) { Impl_->Visit(prototype); }
 void TCodegenVisitor::Visit(const NAst::TFunction& function) { Impl_->Visit(function); }

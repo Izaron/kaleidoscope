@@ -55,6 +55,18 @@ void TDumpVisitor::Visit(const TBinaryExpr& binaryExpr) {
     Dump_ = ss.str();
 }
 
+void TDumpVisitor::Visit(const NAst::TIfExpr& ifExpr) {
+    std::stringstream ss;
+    ss << "IfExpr:\n";
+    ss << "Cond:\n";
+    ss << Indent(Dump(ifExpr.GetCond()));
+    ss << "Then:\n";
+    ss << Indent(Dump(ifExpr.GetThen()));
+    ss << "Else:\n";
+    ss << Indent(Dump(ifExpr.GetElse()));
+    Dump_ = ss.str();
+}
+
 void TDumpVisitor::Visit(const TCallExpr& callExpr) {
     std::stringstream ss;
     ss << "CallExpr: \"" << callExpr.GetCallee().AsStringView() << "\"\n";

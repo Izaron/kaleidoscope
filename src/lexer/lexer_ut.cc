@@ -30,11 +30,11 @@ const std::vector<ETokenKind> TOKEN_KINDS = {
     // def fib(x)
     Def, Identifier, LBracket, Identifier, RBracket,
     // if x < 3 then
-    Identifier, Identifier, Less, Number, Identifier,
+    If, Identifier, Less, Number, Then,
     // 1
     Number,
     // else
-    Identifier,
+    Else,
     // fib(x-1)+fib(x-2)
     Identifier, LBracket, Identifier, Minus, Number, RBracket, Plus,
     Identifier, LBracket, Identifier, Minus, Number, RBracket,

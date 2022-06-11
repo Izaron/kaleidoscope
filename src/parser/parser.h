@@ -22,10 +22,14 @@ public:
     //   ::= identifier '(' expression* ')'
     std::unique_ptr<NAst::TExpr> ParseIdentifierExpr();
 
+    // ifexpr ::= 'if' expr 'then' expr 'else' expr
+    std::unique_ptr<NAst::TExpr> ParseIfExpr();
+
     // primary
     //   ::= identifierexpr
     //   ::= numberexpr
     //   ::= parenexpr
+    //   ::= ifexpr
     std::unique_ptr<NAst::TExpr> ParsePrimaryExpr();
 
     // expr ::= primary binoprhs

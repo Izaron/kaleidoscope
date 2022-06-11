@@ -63,6 +63,12 @@ TToken LexToken(const TSource& source, std::size_t& offset) {
             kind = ETokenKind::Def;
         } else if (identifierStr == "extern") {
             kind = ETokenKind::Extern;
+        } else if (identifierStr == "if") {
+            kind = ETokenKind::If;
+        } else if (identifierStr == "then") {
+            kind = ETokenKind::Then;
+        } else if (identifierStr == "else") {
+            kind = ETokenKind::Else;
         }
 
         // return token

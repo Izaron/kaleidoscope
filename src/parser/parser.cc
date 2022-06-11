@@ -80,6 +80,25 @@ std::unique_ptr<NAst::TExpr> TParser::ParseIdentifierExpr() {
     return std::make_unique<NAst::TCallExpr>(idSourceRange, std::move(args));
 }
 
+std::unique_ptr<NAst::TExpr> TParser::ParseIfExpr() {
+    Tokens_.SkipToken(); // eat 'if'
+    auto condExpr = ParseExpr();
+
+    if (Tokens_.Current().Kind != ETokenKind::Then) {
+        throw std::runtime_error("Expected 'then'");
+    }
+    Tokens_.SkipToken(); // eat 'then'
+    auto thenExpr = ParseExpr();
+
+    if (Tokens_.Current().Kind != ETokenKind::Else) {
+        throw std::runtime_error("Expected 'else'");
+    }
+    Tokens_.SkipToken(); // eat 'else'
+    auto elseExpr = ParseExpr();
+
+    return std::make_unique<NAst::TIfExpr>(std::move(condExpr), std::move(thenExpr), std::move(elseExpr));
+}
+
 std::unique_ptr<NAst::TExpr> TParser::ParsePrimaryExpr() {
     switch (Tokens_.Current().Kind) {
     case ETokenKind::Identifier:
@@ -88,6 +107,8 @@ std::unique_ptr<NAst::TExpr> TParser::ParsePrimaryExpr() {
         return ParseNumberExpr();
     case ETokenKind::LBracket:
         return ParseParenExpr();
+    case ETokenKind::If:
+        return ParseIfExpr();
     default:
         throw std::runtime_error("unknown token when expecting an expression");
     }
